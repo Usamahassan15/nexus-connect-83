@@ -260,16 +260,16 @@ const InstaPost = memo((props: InstaPostProps) => {
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 px-3 pt-2.5">
+      <div className="flex items-center justify-between px-3 pt-2.5">
         <button
           onClick={handleLike}
           aria-label="Like"
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
           <Heart className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
         </button>
         <button
-          onClick={() => setShowComments((p) => !p)}
+          onClick={() => setShowComments(true)}
           aria-label="Comments"
           className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
@@ -282,7 +282,7 @@ const InstaPost = memo((props: InstaPostProps) => {
         >
           <Send className="w-6 h-6" />
         </button>
-        <button onClick={handleSave} aria-label="Save" className="ml-auto active:scale-95">
+        <button onClick={handleSave} aria-label="Save" className="active:scale-95">
           <Bookmark className={`w-6 h-6 ${isSaved ? "fill-primary text-primary" : "text-muted-foreground"}`} />
         </button>
       </div>
@@ -296,50 +296,53 @@ const InstaPost = memo((props: InstaPostProps) => {
         </p>
       )}
       <button
-        onClick={() => setShowComments((p) => !p)}
-        className="px-3 pt-1.5 pb-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setShowComments(true)}
+        className="px-3 pt-1.5 pb-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        {showComments ? "Hide comments" : `View all ${Math.max(0, totalComments).toLocaleString()} comments`}
+        View all {Math.max(0, totalComments).toLocaleString()} comments
       </button>
 
-      {/* Comments */}
-      {showComments && (
-        <div className="px-3 pb-2 border-t border-border pt-2">
-          {comments.map((c) => (
-            <CommentNode
-              key={c.id}
-              comment={c}
-              depth={0}
-              onLike={(id) => setComments((prev) => toggleCommentLike(prev, id))}
-              onReply={(id, a) => setReplyTo({ id, author: a })}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Composer */}
-      <div className="px-3 py-2 border-t border-border">
-        {replyTo && (
-          <div className="flex items-center justify-between pb-1.5 text-xs text-muted-foreground">
-            <span>Replying to {replyTo.author}</span>
-            <button onClick={() => setReplyTo(null)} className="font-medium hover:text-foreground">
-              Cancel
-            </button>
+      {/* Comments UI (separate) */}
+      <Dialog open={showComments} onOpenChange={(o) => { setShowComments(o); if (!o) setReplyTo(null); }}>
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b border-border">
+            <DialogTitle className="text-base">Comments</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[55vh] overflow-y-auto px-3 py-2">
+            {comments.map((c) => (
+              <CommentNode
+                key={c.id}
+                comment={c}
+                depth={0}
+                onLike={(id) => setComments((prev) => toggleCommentLike(prev, id))}
+                onReply={(id, a) => setReplyTo({ id, author: a })}
+              />
+            ))}
           </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submitComment()}
-            placeholder={replyTo ? `Reply to ${replyTo.author}...` : "Add a comment..."}
-            className="h-9 flex-1 text-sm"
-          />
-          <Button size="sm" className="h-9 px-3" disabled={!draft.trim()} onClick={submitComment}>
-            Post
-          </Button>
-        </div>
-      </div>
+          <div className="px-3 py-2.5 border-t border-border">
+            {replyTo && (
+              <div className="flex items-center justify-between pb-1.5 text-xs text-muted-foreground">
+                <span>Replying to {replyTo.author}</span>
+                <button onClick={() => setReplyTo(null)} className="font-medium hover:text-foreground">
+                  Cancel
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submitComment()}
+                placeholder={replyTo ? `Reply to ${replyTo.author}...` : "Add a comment..."}
+                className="h-9 flex-1 text-sm"
+              />
+              <Button size="sm" className="h-9 px-3" disabled={!draft.trim()} onClick={submitComment}>
+                Post
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ShareSheet isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       {media_url && previewOpen && (
@@ -348,6 +351,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     </article>
   );
 });
+
 
 InstaPost.displayName = "InstaPost";
 
