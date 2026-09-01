@@ -535,45 +535,55 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
           /* Project Detail View */
           <ScrollArea className="flex-1">
             <div className="max-w-4xl mx-auto p-3 sm:p-4">
+              {/* Title + top stats */}
+              <div className="mb-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <Badge variant="secondary" className="text-xs">{selectedProject.category}</Badge>
+                      <Badge variant="outline" className="text-xs">{selectedProject.experienceLevel}</Badge>
+                      <Badge variant="outline" className="text-xs">{selectedProject.budgetType}</Badge>
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground">{selectedProject.title}</h2>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Posted {selectedProject.postedDate} · {selectedProject.budget}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => toggleSave(selectedProject.id)} aria-label="Save project" className="p-2 rounded-md hover:bg-muted">
+                      {savedProjects.has(selectedProject.id)
+                        ? <BookmarkCheck className="w-5 h-5 text-primary" />
+                        : <Bookmark className="w-5 h-5 text-muted-foreground" />}
+                    </button>
+                    <button onClick={() => shareProject(selectedProject)} aria-label="Share project" className="p-2 rounded-md hover:bg-muted">
+                      <Share2 className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">Total Bids</p>
+                    <p className="text-xl font-bold text-foreground">{selectedProject.proposals}</p>
+                  </div>
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">Average bid</p>
+                    <p className="text-xl font-bold text-primary">{avgBid}</p>
+                  </div>
+                </div>
+              </div>
+
               <Tabs defaultValue="details" className="w-full">
                 <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
                   <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Details</TabsTrigger>
-                  <TabsTrigger value="bids" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Bids ({bids.length})</TabsTrigger>
+                  <TabsTrigger value="bids" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Proposals ({bids.length})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 pt-4">
-                  {/* Client Info */}
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={selectedProject.clientAvatar} />
-                          <AvatarFallback>{selectedProject.client[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold">{selectedProject.client}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1 text-yellow-500"><Star className="w-3 h-3 fill-current" /><span className="text-xs">{selectedProject.clientRating}</span></div>
-                            <span>·</span>
-                            <span>{selectedProject.clientJobs} jobs posted</span>
-                            <span>·</span>
-                            <span>{selectedProject.postedDate}</span>
-                          </div>
-                        </div>
-                        <button onClick={() => toggleSave(selectedProject.id)} className="p-2 rounded-md hover:bg-muted">
-                          {savedProjects.has(selectedProject.id)
-                            ? <BookmarkCheck className="w-5 h-5 text-primary" />
-                            : <Bookmark className="w-5 h-5 text-muted-foreground" />}
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
                   {/* Project Details */}
                   <Card>
                     <CardContent className="p-4 space-y-4">
                       <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
+                        <h3 className="font-semibold mb-2">Project Description</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{selectedProject.description}</p>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -593,20 +603,72 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
                         ))}
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold mb-2">Required Skills</h4>
+                        <h4 className="text-sm font-semibold mb-2">Skills Required</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedProject.skills.map(s => <Badge key={s} variant="secondary">{s}</Badge>)}
                         </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">{selectedProject.proposals}</span> proposals submitted
+                    </CardContent>
+                  </Card>
+
+                  {/* About the Client */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-3">About the Client</h3>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={selectedProject.clientAvatar} />
+                          <AvatarFallback>{selectedProject.client[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">{selectedProject.client}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1 text-yellow-500"><Star className="w-3 h-3 fill-current" /><span className="text-xs text-foreground">{selectedProject.clientRating}</span></span>
+                            <span>·</span>
+                            <span className="text-xs">{selectedProject.clientJobs} projects posted</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Member since</p>
+                          <p className="text-sm font-semibold">2023</p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Payment</p>
+                          <p className="text-sm font-semibold">Verified</p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Hire rate</p>
+                          <p className="text-sm font-semibold">86%</p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Button className="w-full" onClick={() => setShowProposalModal(true)}>
-                    <Send className="w-4 h-4 mr-2" />Submit Proposal
-                  </Button>
+                  {/* Place a bid */}
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold">Place a bid on this project</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Bid amount</Label>
+                          <Input placeholder="e.g., 150" value={proposalForm.bidAmount} onChange={e => setProposalForm({ ...proposalForm, bidAmount: e.target.value })} className="mt-1" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Delivery time</Label>
+                          <Input placeholder="e.g., 14 days" value={proposalForm.deliveryTime} onChange={e => setProposalForm({ ...proposalForm, deliveryTime: e.target.value })} className="mt-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Describe your proposal</Label>
+                        <Textarea rows={3} placeholder="Why are you the best fit for this project?" value={proposalForm.message} onChange={e => setProposalForm({ ...proposalForm, message: e.target.value })} className="mt-1" />
+                      </div>
+                      <Button className="w-full" onClick={handleSubmitProposal}>
+                        <Send className="w-4 h-4 mr-2" />Place Bid
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="bids" className="space-y-3 pt-4">
@@ -636,7 +698,13 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
                                     <span className="font-bold text-primary">{bid.amount}</span>
                                     <span className="text-muted-foreground">in {bid.deliveryTime}</span>
                                   </div>
-                                  <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">{bid.proposal}</p>
+                                  <p className="text-sm text-muted-foreground mt-1.5">{bid.proposal}</p>
+                                  <button
+                                    onClick={() => toast({ title: "Bid reported", description: "Thanks, our team will review this proposal." })}
+                                    className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                                  >
+                                    <Flag className="w-3.5 h-3.5" /> Report Bid
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -649,6 +717,7 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
               </Tabs>
             </div>
           </ScrollArea>
+
         )}
       </div>
 
