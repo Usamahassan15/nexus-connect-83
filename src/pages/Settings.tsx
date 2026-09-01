@@ -487,7 +487,7 @@ export default function Settings() {
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="notif-transport" className="text-sm sm:text-base">Transport</Label>
+                  <Label htmlFor="notif-transport" className="text-sm sm:text-base">Rides</Label>
                   <Switch
                     id="notif-transport"
                     disabled={!pushEnabled}

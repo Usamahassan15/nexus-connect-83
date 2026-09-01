@@ -427,7 +427,7 @@ export default function Transport() {
             </div>
             {screen === "home" && (
               <>
-                <Header title="Transport" />
+                <Header title="Rides" />
                 <div className="p-4">
                   <button
                     onClick={() => setScreen("services")}

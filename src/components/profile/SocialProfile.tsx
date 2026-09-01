@@ -2,7 +2,7 @@ import { Image, MoreVertical, Edit, Trash2, Pin } from "lucide-react";
 import ImagePreview from "@/components/ImagePreview";
 import { motion } from "framer-motion";
 import { useState, useCallback } from "react";
-import Post from "@/components/Post";
+import InstaPost from "@/components/InstaPost";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -156,7 +156,7 @@ export default function SocialProfile() {
                   </div>
                 </div>
               ) : (
-                <Post {...post} />
+                <InstaPost id={String(post.id)} content={post.content} media_url={post.image} likes_count={post.likes} comments_count={post.comments} author={post.author} avatar={post.avatar} time={post.time} />
               )}
             </div>
           ))}
