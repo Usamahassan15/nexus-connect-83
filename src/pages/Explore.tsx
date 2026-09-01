@@ -194,7 +194,7 @@ const Explore = () => {
                   <TabsTrigger value="people" className="text-xs sm:text-sm">People</TabsTrigger>
                   <TabsTrigger value="posts" className="text-xs sm:text-sm">Posts</TabsTrigger>
                   <TabsTrigger value="services" className="text-xs sm:text-sm">Services</TabsTrigger>
-                  <TabsTrigger value="transport" className="text-xs sm:text-sm">Transport</TabsTrigger>
+                  <TabsTrigger value="transport" className="text-xs sm:text-sm">Rides</TabsTrigger>
                   <TabsTrigger value="hashtags" className="text-xs sm:text-sm">Hashtags</TabsTrigger>
                 </TabsList>
 
@@ -239,7 +239,7 @@ const Explore = () => {
                         </SearchSection>
                       )}
                       {filteredTransport.length > 0 && (
-                        <SearchSection title="Transport" icon={<Car className="w-4 h-4" />}>
+                        <SearchSection title="Rides" icon={<Car className="w-4 h-4" />}>
                           {filteredTransport.map(route => <TransportCard key={route.id} route={route} onClick={() => navigate("/transport")} />)}
                         </SearchSection>
                       )}

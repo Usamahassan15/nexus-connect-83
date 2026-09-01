@@ -14,7 +14,7 @@ const Sidebar = () => {
     { icon: User, label: "Profile", path: "/profile" },
     { icon: FolderKanban, label: "Projects & Bidding", path: "/services?openProjects=1", forcedActive: isProjectsActive, forcedInactive: !isProjectsActive },
     { icon: Handshake, label: "Services", path: "/services", forcedActive: isServicesActive, forcedInactive: !isServicesActive },
-    { icon: Car, label: "Transport", path: "/transport" },
+    { icon: Car, label: "Rides", path: "/transport" },
     { icon: Wallet, label: "Wallet", path: "/wallet" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];

@@ -145,9 +145,6 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [savedProjects, setSavedProjects] = useState<Set<number>>(new Set());
   const [bids, setBids] = useState<Bid[]>(projectBids);
-  const [gatedProject, setGatedProject] = useState<Project | null>(null);
-  const [accessStep, setAccessStep] = useState<"preview" | "pass">("preview");
-  const [walletBalance, setWalletBalance] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const proposalFileRef = useRef<HTMLInputElement>(null);
 
@@ -273,9 +270,20 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
     </div>
   );
 
-  const openProject = (p: Project) => {
-    if (p.isOwn) setSelectedProject(p);
-    else { setGatedProject(p); setAccessStep("preview"); }
+  const openProject = (p: Project) => setSelectedProject(p);
+
+  const avgBid = useMemo(() => {
+    const nums = bids.map(b => parseInt(b.amount.replace(/[^0-9]/g, "")) || 0).filter(Boolean);
+    if (!nums.length) return "—";
+    return `£${Math.round(nums.reduce((a, b) => a + b, 0) / nums.length)} GBP`;
+  }, [bids]);
+
+  const shareProject = async (project: Project) => {
+    const url = `${window.location.origin}/services?project=${project.id}`;
+    try {
+      if (navigator.share) await navigator.share({ title: project.title, text: project.description, url });
+      else { await navigator.clipboard.writeText(url); toast({ title: "Project link copied" }); }
+    } catch { /* dismissed */ }
   };
 
   // Project card component
@@ -527,45 +535,55 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
           /* Project Detail View */
           <ScrollArea className="flex-1">
             <div className="max-w-4xl mx-auto p-3 sm:p-4">
+              {/* Title + top stats */}
+              <div className="mb-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <Badge variant="secondary" className="text-xs">{selectedProject.category}</Badge>
+                      <Badge variant="outline" className="text-xs">{selectedProject.experienceLevel}</Badge>
+                      <Badge variant="outline" className="text-xs">{selectedProject.budgetType}</Badge>
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground">{selectedProject.title}</h2>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Posted {selectedProject.postedDate} · {selectedProject.budget}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => toggleSave(selectedProject.id)} aria-label="Save project" className="p-2 rounded-md hover:bg-muted">
+                      {savedProjects.has(selectedProject.id)
+                        ? <BookmarkCheck className="w-5 h-5 text-primary" />
+                        : <Bookmark className="w-5 h-5 text-muted-foreground" />}
+                    </button>
+                    <button onClick={() => shareProject(selectedProject)} aria-label="Share project" className="p-2 rounded-md hover:bg-muted">
+                      <Share2 className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">Total Bids</p>
+                    <p className="text-xl font-bold text-foreground">{selectedProject.proposals}</p>
+                  </div>
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">Average bid</p>
+                    <p className="text-xl font-bold text-primary">{avgBid}</p>
+                  </div>
+                </div>
+              </div>
+
               <Tabs defaultValue="details" className="w-full">
                 <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
                   <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Details</TabsTrigger>
-                  <TabsTrigger value="bids" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Bids ({bids.length})</TabsTrigger>
+                  <TabsTrigger value="bids" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Proposals ({bids.length})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 pt-4">
-                  {/* Client Info */}
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={selectedProject.clientAvatar} />
-                          <AvatarFallback>{selectedProject.client[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold">{selectedProject.client}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1 text-yellow-500"><Star className="w-3 h-3 fill-current" /><span className="text-xs">{selectedProject.clientRating}</span></div>
-                            <span>·</span>
-                            <span>{selectedProject.clientJobs} jobs posted</span>
-                            <span>·</span>
-                            <span>{selectedProject.postedDate}</span>
-                          </div>
-                        </div>
-                        <button onClick={() => toggleSave(selectedProject.id)} className="p-2 rounded-md hover:bg-muted">
-                          {savedProjects.has(selectedProject.id)
-                            ? <BookmarkCheck className="w-5 h-5 text-primary" />
-                            : <Bookmark className="w-5 h-5 text-muted-foreground" />}
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
                   {/* Project Details */}
                   <Card>
                     <CardContent className="p-4 space-y-4">
                       <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
+                        <h3 className="font-semibold mb-2">Project Description</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{selectedProject.description}</p>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -585,20 +603,72 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
                         ))}
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold mb-2">Required Skills</h4>
+                        <h4 className="text-sm font-semibold mb-2">Skills Required</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedProject.skills.map(s => <Badge key={s} variant="secondary">{s}</Badge>)}
                         </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">{selectedProject.proposals}</span> proposals submitted
+                    </CardContent>
+                  </Card>
+
+                  {/* About the Client */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-3">About the Client</h3>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={selectedProject.clientAvatar} />
+                          <AvatarFallback>{selectedProject.client[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">{selectedProject.client}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1 text-yellow-500"><Star className="w-3 h-3 fill-current" /><span className="text-xs text-foreground">{selectedProject.clientRating}</span></span>
+                            <span>·</span>
+                            <span className="text-xs">{selectedProject.clientJobs} projects posted</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Member since</p>
+                          <p className="text-sm font-semibold">2023</p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Payment</p>
+                          <p className="text-sm font-semibold">Verified</p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-muted/50">
+                          <p className="text-[11px] text-muted-foreground">Hire rate</p>
+                          <p className="text-sm font-semibold">86%</p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Button className="w-full" onClick={() => setShowProposalModal(true)}>
-                    <Send className="w-4 h-4 mr-2" />Submit Proposal
-                  </Button>
+                  {/* Place a bid */}
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold">Place a bid on this project</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Bid amount</Label>
+                          <Input placeholder="e.g., 150" value={proposalForm.bidAmount} onChange={e => setProposalForm({ ...proposalForm, bidAmount: e.target.value })} className="mt-1" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Delivery time</Label>
+                          <Input placeholder="e.g., 14 days" value={proposalForm.deliveryTime} onChange={e => setProposalForm({ ...proposalForm, deliveryTime: e.target.value })} className="mt-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Describe your proposal</Label>
+                        <Textarea rows={3} placeholder="Why are you the best fit for this project?" value={proposalForm.message} onChange={e => setProposalForm({ ...proposalForm, message: e.target.value })} className="mt-1" />
+                      </div>
+                      <Button className="w-full" onClick={handleSubmitProposal}>
+                        <Send className="w-4 h-4 mr-2" />Place Bid
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="bids" className="space-y-3 pt-4">
@@ -628,7 +698,13 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
                                     <span className="font-bold text-primary">{bid.amount}</span>
                                     <span className="text-muted-foreground">in {bid.deliveryTime}</span>
                                   </div>
-                                  <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">{bid.proposal}</p>
+                                  <p className="text-sm text-muted-foreground mt-1.5">{bid.proposal}</p>
+                                  <button
+                                    onClick={() => toast({ title: "Bid reported", description: "Thanks, our team will review this proposal." })}
+                                    className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                                  >
+                                    <Flag className="w-3.5 h-3.5" /> Report Bid
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -641,6 +717,7 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
               </Tabs>
             </div>
           </ScrollArea>
+
         )}
       </div>
 
@@ -790,120 +867,6 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
         </DialogContent>
       </Dialog>
 
-      {/* Gated Project Access Dialog */}
-      <Dialog open={!!gatedProject} onOpenChange={(o) => { if (!o) setGatedProject(null); }}>
-        <DialogContent className="max-w-md p-0 overflow-hidden gap-0 [&>button]:hidden">
-          {gatedProject && accessStep === "preview" && (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="font-semibold text-base">Project Details</h2>
-                <button onClick={() => setGatedProject(null)} className="p-1.5 rounded-md hover:bg-muted">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <ScrollArea className="max-h-[70vh]">
-                <div className="p-4 space-y-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <Badge variant="secondary" className="text-xs">{gatedProject.category}</Badge>
-                      <Badge variant="outline" className="text-xs">{gatedProject.experienceLevel}</Badge>
-                    </div>
-                    <h3 className="font-bold text-lg">{gatedProject.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-2">{gatedProject.description}</p>
-                  </div>
-
-                  <div className="flex flex-col items-center text-center pt-2 pb-1 border-t border-border">
-                    <Avatar className="w-16 h-16 mt-4">
-                      <AvatarImage src={gatedProject.clientAvatar} />
-                      <AvatarFallback>{gatedProject.client[0]}</AvatarFallback>
-                    </Avatar>
-                    <p className="font-semibold mt-2">{gatedProject.client}</p>
-                    <div className="flex items-center gap-1 text-yellow-500 mt-1">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="text-sm font-medium text-foreground">{gatedProject.clientRating}</span>
-                      <span className="text-xs text-muted-foreground">rating</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      <span className="font-medium text-foreground">{gatedProject.clientJobs}</span> total orders
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Posted {gatedProject.postedDate}
-                    </p>
-                  </div>
-                </div>
-              </ScrollArea>
-              <div className="p-4 border-t border-border">
-                <Button
-                  className="w-full gap-2 bg-gradient-to-r from-primary to-primary/80 h-11"
-                  onClick={() => setAccessStep("pass")}
-                >
-                  <Lock className="w-4 h-4" />
-                  Get Access for 1 Month
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {gatedProject && accessStep === "pass" && (
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <button onClick={() => setAccessStep("preview")} className="p-1.5 rounded-md hover:bg-muted">
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <h2 className="font-semibold text-base">Access Pass</h2>
-                <button onClick={() => setGatedProject(null)} className="p-1.5 rounded-md hover:bg-muted">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-5 space-y-5">
-                <div className="text-center space-y-2">
-                  <div className="inline-flex w-14 h-14 rounded-full bg-primary/10 items-center justify-center mb-1">
-                    <Lock className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold">1 Month Pass</h3>
-                  <p className="text-sm text-foreground">Send Unlimited offers</p>
-                </div>
-
-                <div className="rounded-lg border border-border bg-muted/40 p-3">
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3.5 h-3.5 text-green-600" />
-                    </div>
-                    <p className="text-sm">0 service fee, only one-time charge from your balance</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Your balance</p>
-                    <p className="font-semibold">RS {walletBalance}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Button
-                    className="w-full h-11 bg-gradient-to-r from-primary to-primary/80"
-                    onClick={() => { setWalletBalance(b => b + 1000); toast({ title: "Balance topped up by RS 1000" }); }}
-                  >
-                    Top Up RS 1000
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-11 gap-2"
-                    onClick={() => toast({ title: "How it works", description: "Buy a 1 Month Pass to send unlimited offers on this project with 0 service fee." })}
-                  >
-                    <HelpCircle className="w-4 h-4" />
-                    How it works
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

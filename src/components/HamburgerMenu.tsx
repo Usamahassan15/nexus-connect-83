@@ -74,7 +74,7 @@ const HamburgerMenu = ({ isOpen, onClose }: HamburgerMenuProps) => {
     },
     {
       icon: Car,
-      label: "Transport",
+      label: "Rides",
       onClick: () => {
         navigate("/transport");
         onClose();

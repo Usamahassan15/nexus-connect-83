@@ -20,7 +20,7 @@ import SocialProfile from "@/components/profile/SocialProfile";
 import FollowersFollowingDialog from "@/components/FollowersFollowingDialog";
 import ShareProfileModal from "@/components/ShareProfileModal";
 import { savedPostsMock } from "@/lib/savedPosts";
-import Post from "@/components/Post";
+import InstaPost from "@/components/InstaPost";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -228,15 +228,16 @@ export default function Profile() {
                             />
                           ) : (
                             savedPostsMock.map((post) => (
-                              <Post
+                              <InstaPost
                                 key={post.id}
+                                id={String(post.id)}
                                 author={post.author}
                                 avatar={post.avatar}
                                 time={post.time}
                                 content={post.content}
-                                image={post.image}
-                                likes={post.likes}
-                                comments={post.comments}
+                                media_url={post.image}
+                                likes_count={post.likes}
+                                comments_count={post.comments}
                               />
                             ))
                           )}
