@@ -41,6 +41,7 @@ export interface InstaPostProps {
   created_at?: string;
   author?: string;
   avatar?: string;
+  time?: string;
 }
 
 const formatTime = (dateStr?: string) => {
@@ -146,6 +147,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     author,
     avatar,
     user_id,
+    time,
   } = props;
 
   const [isLiked, setIsLiked] = useState(false);
@@ -220,7 +222,7 @@ const InstaPost = memo((props: InstaPostProps) => {
           <p className="text-xs text-muted-foreground truncate">
             {category ? `#${category}` : ""}
             {category && created_at ? " · " : ""}
-            {formatTime(created_at)}
+            {formatTime(created_at) || time || ""}
           </p>
         </div>
         <DropdownMenu>
