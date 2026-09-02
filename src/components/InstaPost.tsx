@@ -192,8 +192,10 @@ const InstaPost = memo((props: InstaPostProps) => {
 
   const handleShare = useCallback(() => {
     playShare();
+    setShareCount((c) => c + 1);
     setShareOpen(true);
   }, [playShare]);
+
 
   const submitComment = useCallback(() => {
     const text = draft.trim();
