@@ -143,6 +143,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     is_anonymous,
     likes_count,
     comments_count,
+    shares_count,
     created_at,
     author,
     avatar,
@@ -158,7 +159,9 @@ const InstaPost = memo((props: InstaPostProps) => {
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; author: string } | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [shareCount, setShareCount] = useState(shares_count ?? Math.max(1, Math.round(likes_count * 0.09)));
   const [previewOpen, setPreviewOpen] = useState(false);
+
 
   const playLike = useUISound("like");
   const playComment = useUISound("comment");
@@ -189,8 +192,10 @@ const InstaPost = memo((props: InstaPostProps) => {
 
   const handleShare = useCallback(() => {
     playShare();
+    setShareCount((c) => c + 1);
     setShareOpen(true);
   }, [playShare]);
+
 
   const submitComment = useCallback(() => {
     const text = draft.trim();
@@ -268,28 +273,32 @@ const InstaPost = memo((props: InstaPostProps) => {
         <button
           onClick={handleLike}
           aria-label="Like"
-          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
           <Heart className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+          <span className="text-sm font-semibold text-foreground">{likes.toLocaleString()}</span>
         </button>
         <button
           onClick={() => setShowComments(true)}
           aria-label="Comments"
-          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
           <MessageCircle className="w-6 h-6" />
+          <span className="text-sm font-semibold text-foreground">{Math.max(0, totalComments).toLocaleString()}</span>
         </button>
         <button
           onClick={handleShare}
           aria-label="Share"
-          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
           <Send className="w-6 h-6" />
+          <span className="text-sm font-semibold text-foreground">{shareCount.toLocaleString()}</span>
         </button>
         <button onClick={handleSave} aria-label="Save" className="active:scale-95">
           <Bookmark className={`w-6 h-6 ${isSaved ? "fill-primary text-primary" : "text-muted-foreground"}`} />
         </button>
       </div>
+
 
       {/* Likes + caption */}
       <p className="px-3 pt-2 text-sm font-semibold text-foreground">{likes.toLocaleString()} likes</p>

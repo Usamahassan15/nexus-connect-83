@@ -105,16 +105,17 @@ export default function SocialProfile() {
   return (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-4">
-          <TabsTrigger value="posts" className="gap-2">
+        <TabsList className="w-full grid grid-cols-2 mb-4 bg-transparent p-0 gap-1">
+          <TabsTrigger value="posts" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Image className="w-4 h-4" /> Posts
           </TabsTrigger>
-          <TabsTrigger value="photos" className="gap-2">
+          <TabsTrigger value="photos" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Image className="w-4 h-4" /> Photos
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="posts" className="space-y-3 sm:space-y-4">
+        <TabsContent value="posts" className="space-y-1 sm:space-y-4">
+
           {sortedPosts.map((post) => (
             <div key={post.id} className="relative">
               {/* Pin indicator */}

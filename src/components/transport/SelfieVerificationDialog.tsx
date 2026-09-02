@@ -62,13 +62,16 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        try { await videoRef.current.play(); } catch {}
-      }
       setStatus("scanning");
       setHint("Keep face centered inside the circle");
-      startDetection();
+      // video element is always mounted, attach on next frame
+      requestAnimationFrame(async () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          try { await videoRef.current.play(); } catch {}
+        }
+        startDetection();
+      });
     } catch (e: any) {
       setStatus("error");
       const name = e?.name || "";
@@ -92,31 +95,48 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
     // @ts-ignore
     const FD = (window as any).FaceDetector;
     const detector = FD ? new FD({ fastMode: true, maxDetectedFaces: 1 }) : null;
+    const work = document.createElement("canvas");
+    work.width = 48; work.height = 48;
+    const wctx = work.getContext("2d", { willReadFrequently: true })!;
 
     let lastDetected = 0;
     const tick = async () => {
       const v = videoRef.current;
       if (!v || v.readyState < 2) { rafRef.current = requestAnimationFrame(tick); return; }
       try {
-        let bbox: { x: number; y: number; width: number; height: number } | null = null;
+        let nx: number | null = null;
+        let nw = 0;
+
         if (detector) {
           const faces = await detector.detect(v);
           if (faces && faces[0]) {
             const b = faces[0].boundingBox;
-            bbox = { x: b.x, y: b.y, width: b.width, height: b.height };
+            const vw = v.videoWidth || 640;
+            nx = (b.x + b.width / 2) / vw;
+            nw = b.width / vw;
           }
         } else {
-          const w = v.videoWidth, h = v.videoHeight;
-          bbox = { x: w * 0.25, y: h * 0.2, width: w * 0.5, height: h * 0.6 };
+          // Fallback: track horizontal brightness centroid — shifts when head turns
+          wctx.drawImage(v, 0, 0, work.width, work.height);
+          const { data } = wctx.getImageData(0, 0, work.width, work.height);
+          let sum = 0, weighted = 0;
+          for (let y = 0; y < work.height; y++) {
+            for (let x = 0; x < work.width; x++) {
+              const i = (y * work.width + x) * 4;
+              const lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+              const w = lum * lum;
+              sum += w;
+              weighted += w * x;
+            }
+          }
+          if (sum > 0.5) {
+            nx = weighted / sum / work.width;
+            nw = 0.5;
+          }
         }
 
-        if (bbox) {
+        if (nx !== null) {
           lastDetected = performance.now();
-          const cx = bbox.x + bbox.width / 2;
-          const vw = v.videoWidth || 640;
-          const nx = cx / vw;
-          const nw = bbox.width / vw;
-
           const r = rangeRef.current ?? { minX: nx, maxX: nx, minW: nw, maxW: nw };
           r.minX = Math.min(r.minX, nx);
           r.maxX = Math.max(r.maxX, nx);
@@ -125,8 +145,11 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
           rangeRef.current = r;
 
           const xRange = r.maxX - r.minX;
-          const wRange = r.maxW > 0 ? (r.maxW - r.minW) / r.maxW : 0;
-          const raw = xRange / 0.32 * 0.75 + wRange / 0.35 * 0.25;
+          const target = detector ? 0.32 : 0.14;
+          const wRange = detector && r.maxW > 0 ? (r.maxW - r.minW) / r.maxW : 0;
+          const raw = detector
+            ? (xRange / target) * 0.75 + (wRange / 0.35) * 0.25
+            : xRange / target;
           const pct = Math.max(0, Math.min(1, raw)) * 100;
           setPercent(prev => Math.max(prev, Math.round(pct)));
 
@@ -143,6 +166,7 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
     };
     rafRef.current = requestAnimationFrame(tick);
   };
+
 
   const capture = async () => {
     const v = videoRef.current, c = canvasRef.current;
@@ -203,17 +227,24 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
               />
             </svg>
             <div className="absolute inset-3 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                autoPlay
+                className={`absolute inset-0 w-full h-full object-cover ${showVideo ? "opacity-100" : "opacity-0"}`}
+                style={{ transform: "scaleX(-1)" }}
+              />
               {status === "error" ? (
-                <div className="text-center text-xs text-red-600 px-6">{errorMsg}</div>
-              ) : status === "idle" || status === "starting" ? (
-                <div className="text-center text-xs text-gray-500 px-6 flex flex-col items-center gap-2">
+                <div className="relative text-center text-xs text-red-600 px-6">{errorMsg}</div>
+              ) : !showVideo ? (
+                <div className="relative text-center text-xs text-gray-500 px-6 flex flex-col items-center gap-2">
                   <Camera className="w-10 h-10 text-[hsl(199_100%_50%)]" />
                   {status === "starting" ? "Requesting camera..." : "Tap Start Camera below"}
                 </div>
-              ) : (
-                <video ref={videoRef} playsInline muted autoPlay className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
-              )}
+              ) : null}
             </div>
+
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white shadow-md rounded-full px-3 py-1 text-sm font-bold" style={{ color: percent >= 100 ? "#10b981" : "hsl(199 100% 50%)" }}>
               {percent}%
             </div>
