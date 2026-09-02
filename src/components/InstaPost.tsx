@@ -143,6 +143,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     is_anonymous,
     likes_count,
     comments_count,
+    shares_count,
     created_at,
     author,
     avatar,
@@ -158,7 +159,9 @@ const InstaPost = memo((props: InstaPostProps) => {
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; author: string } | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [shareCount, setShareCount] = useState(shares_count ?? Math.max(1, Math.round(likes_count * 0.09)));
   const [previewOpen, setPreviewOpen] = useState(false);
+
 
   const playLike = useUISound("like");
   const playComment = useUISound("comment");
