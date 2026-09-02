@@ -28,10 +28,11 @@ const HamburgerMenu = ({ isOpen, onClose }: HamburgerMenuProps) => {
 
   const menuItems = [
     {
-      icon: Heart,
-      label: "My Interests",
+      icon: Car,
+      label: "Rides",
       onClick: () => {
-        setShowInterests(true);
+        navigate("/transport");
+        onClose();
       },
     },
     {
@@ -73,11 +74,10 @@ const HamburgerMenu = ({ isOpen, onClose }: HamburgerMenuProps) => {
       },
     },
     {
-      icon: Car,
-      label: "Rides",
+      icon: Heart,
+      label: "My Interests",
       onClick: () => {
-        navigate("/transport");
-        onClose();
+        setShowInterests(true);
       },
     },
 
@@ -96,6 +96,7 @@ const HamburgerMenu = ({ isOpen, onClose }: HamburgerMenuProps) => {
       },
     },
   ];
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
