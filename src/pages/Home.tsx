@@ -218,9 +218,9 @@ const Home = () => {
           )}
 
           {/* Feed - render suggested posts immediately, replace when live data arrives */}
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-1 sm:space-y-4">
             {isLoading && posts.length === 0 && (
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-1 sm:space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <FeedSkeleton key={i} />
                 ))}
