@@ -184,7 +184,7 @@ export default function Profile() {
             <>
               {/* Work / Social Toggle */}
               <div className="px-3 sm:px-4 md:px-6 mb-4">
-                <div className="flex rounded-xl bg-muted p-1 gap-1">
+                <div className="flex rounded-xl bg-transparent border border-border p-1 gap-1">
                   <button onClick={() => setProfileMode("social")}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${profileMode === "social" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                     <Users className="w-4 h-4" /> Social
@@ -199,11 +199,11 @@ export default function Profile() {
               {profileMode === "social" && (
                 <div className="px-3 sm:px-4 md:px-6 mb-4">
                   <Tabs value={contentTab} onValueChange={(v) => setContentTab(v as "posts" | "saved")} className="w-full">
-                    <TabsList className="w-full grid grid-cols-2">
-                      <TabsTrigger value="posts" className="gap-2">
+                    <TabsList className="w-full grid grid-cols-2 bg-transparent p-0 gap-1">
+                      <TabsTrigger value="posts" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Grid3x3 className="w-4 h-4" /> User Posts
                       </TabsTrigger>
-                      <TabsTrigger value="saved" className="gap-2">
+                      <TabsTrigger value="saved" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Bookmark className="w-4 h-4" /> Saved Posts
                       </TabsTrigger>
                     </TabsList>
@@ -219,7 +219,8 @@ export default function Profile() {
                       {profileMode === "work" ? (
                         <WorkProfile />
                       ) : contentTab === "saved" ? (
-                        <div className="px-3 sm:px-0 space-y-3 sm:space-y-4">
+                        <div className="px-3 sm:px-0 space-y-1 sm:space-y-4">
+
                           {savedPostsMock.length === 0 ? (
                             <EmptyState
                               icon={Bookmark}
