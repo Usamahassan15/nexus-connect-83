@@ -4,7 +4,7 @@ import {
   ArrowLeft, ChevronUp, ChevronDown, Clock, DollarSign, User, Send, Star,
   Calendar, Briefcase, Award, Search, SlidersHorizontal, Layers, TrendingUp, FileText,
   MapPin, Globe, Timer, Wrench, Languages, X, Plus, Paperclip, Bookmark,
-  BookmarkCheck, Eye, SortAsc, Lock, Check, Wallet, HelpCircle,
+  BookmarkCheck, Eye, SortAsc, Share2, Flag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
