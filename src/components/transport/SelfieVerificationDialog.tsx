@@ -227,17 +227,24 @@ export default function SelfieVerificationDialog({ open, onOpenChange, onVerifie
               />
             </svg>
             <div className="absolute inset-3 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                autoPlay
+                className={`absolute inset-0 w-full h-full object-cover ${showVideo ? "opacity-100" : "opacity-0"}`}
+                style={{ transform: "scaleX(-1)" }}
+              />
               {status === "error" ? (
-                <div className="text-center text-xs text-red-600 px-6">{errorMsg}</div>
-              ) : status === "idle" || status === "starting" ? (
-                <div className="text-center text-xs text-gray-500 px-6 flex flex-col items-center gap-2">
+                <div className="relative text-center text-xs text-red-600 px-6">{errorMsg}</div>
+              ) : !showVideo ? (
+                <div className="relative text-center text-xs text-gray-500 px-6 flex flex-col items-center gap-2">
                   <Camera className="w-10 h-10 text-[hsl(199_100%_50%)]" />
                   {status === "starting" ? "Requesting camera..." : "Tap Start Camera below"}
                 </div>
-              ) : (
-                <video ref={videoRef} playsInline muted autoPlay className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
-              )}
+              ) : null}
             </div>
+
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white shadow-md rounded-full px-3 py-1 text-sm font-bold" style={{ color: percent >= 100 ? "#10b981" : "hsl(199 100% 50%)" }}>
               {percent}%
             </div>
