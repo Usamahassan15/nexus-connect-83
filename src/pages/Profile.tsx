@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Link as LinkIcon, Camera, Edit, Plus, Settings, Image, Type, Briefcase, Users, BadgeCheck, Share2, Bookmark, Grid3x3 } from "lucide-react";
+import { Calendar, MapPin, Link as LinkIcon, Camera, Edit, Plus, Settings, Image, Type, Briefcase, Users, BadgeCheck, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,15 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "@/hooks/use-toast";
 import WorkProfile from "@/components/profile/WorkProfile";
 import SocialProfile from "@/components/profile/SocialProfile";
 import FollowersFollowingDialog from "@/components/FollowersFollowingDialog";
 import ShareProfileModal from "@/components/ShareProfileModal";
-import { savedPostsMock } from "@/lib/savedPosts";
-import InstaPost from "@/components/InstaPost";
+
 
 export default function Profile() {
   const navigate = useNavigate();
