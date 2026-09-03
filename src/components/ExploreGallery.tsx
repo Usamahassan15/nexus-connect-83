@@ -223,7 +223,7 @@ const GalleryViewer = ({
         ref={containerRef}
         className="h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain"
       >
-        <div className="mx-auto w-full max-w-[560px] pb-16 space-y-3">
+        <div className="mx-auto w-full max-w-[560px] pb-16 space-y-1 sm:space-y-4">
           {items.map((item, idx) => (
             <div key={item.id} data-idx={idx}>
               <InstaPost
@@ -233,8 +233,10 @@ const GalleryViewer = ({
                 category={item.category}
                 likes_count={item.likes}
                 comments_count={item.comments}
+                shares_count={Math.max(1, Math.round(item.likes * 0.09))}
                 author={item.author}
                 avatar={item.avatar}
+                time={`${1 + (idx % 23)}h`}
               />
             </div>
           ))}
