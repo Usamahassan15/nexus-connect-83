@@ -216,8 +216,9 @@ const Messages = () => {
       <Sidebar />
       <TopBar />
       
-      <main className={`flex-1 pt-14 md:pt-14 ${showConversationList ? 'pb-16' : 'pb-0'} md:pb-8 flex`}>
-        <div className={`${showConversationList ? 'h-[calc(100vh-8rem)]' : 'h-[calc(100vh-3.5rem)]'} md:h-[calc(100vh-4rem)] flex w-full`}>
+      <main className={`flex-1 pt-14 md:pt-14 ${showConversationList ? 'pb-16' : 'pb-0'} md:pb-8 flex overflow-hidden`}>
+        <div className={`${showConversationList ? 'h-[calc(100dvh-8rem)]' : 'h-[calc(100dvh-3.5rem)]'} md:h-[calc(100dvh-4rem)] flex w-full overflow-hidden`}>
+
           {/* Conversations List */}
           <div
             className={`${
@@ -383,7 +384,7 @@ const Messages = () => {
                           {conversation.lastMessage}
                         </p>
                         {conversation.unread && (
-                          <span className="ml-2 flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground text-xs flex items-center justify-center">
+                          <span className="ml-2 flex-shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center">
                             {conversation.unread}
                           </span>
                         )}

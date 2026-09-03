@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Link as LinkIcon, Camera, Edit, Plus, Settings, Image, Type, Briefcase, Users, BadgeCheck, Share2, Bookmark, Grid3x3 } from "lucide-react";
+import { Calendar, MapPin, Link as LinkIcon, Camera, Edit, Plus, Settings, Image, Type, Briefcase, Users, BadgeCheck, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,15 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "@/hooks/use-toast";
 import WorkProfile from "@/components/profile/WorkProfile";
 import SocialProfile from "@/components/profile/SocialProfile";
 import FollowersFollowingDialog from "@/components/FollowersFollowingDialog";
 import ShareProfileModal from "@/components/ShareProfileModal";
-import { savedPostsMock } from "@/lib/savedPosts";
-import InstaPost from "@/components/InstaPost";
+
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -35,7 +32,7 @@ export default function Profile() {
   const [isCoverPreviewOpen, setIsCoverPreviewOpen] = useState(false);
   const [connectionsTab, setConnectionsTab] = useState<"followers" | "following" | null>(null);
   const [isShareProfileOpen, setIsShareProfileOpen] = useState(false);
-  const [contentTab, setContentTab] = useState<"posts" | "saved">("posts");
+  
   const [isLoading, setIsLoading] = useState(true);
   const isVerified = true;
 
@@ -196,60 +193,17 @@ export default function Profile() {
                 </div>
               </div>
 
-              {profileMode === "social" && (
-                <div className="px-3 sm:px-4 md:px-6 mb-4">
-                  <Tabs value={contentTab} onValueChange={(v) => setContentTab(v as "posts" | "saved")} className="w-full">
-                    <TabsList className="w-full grid grid-cols-2 bg-transparent p-0 gap-1">
-                      <TabsTrigger value="posts" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Grid3x3 className="w-4 h-4" /> User Posts
-                      </TabsTrigger>
-                      <TabsTrigger value="saved" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Bookmark className="w-4 h-4" /> Saved Posts
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
-
               {/* Dynamic Content */}
               <div className="px-0 sm:px-4 md:px-6 lg:px-0">
                 <div className="w-full max-w-[560px]">
                   <AnimatePresence mode="wait">
-                    <motion.div key={`${profileMode}-${contentTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-                      {profileMode === "work" ? (
-                        <WorkProfile />
-                      ) : contentTab === "saved" ? (
-                        <div className="px-3 sm:px-0 space-y-1 sm:space-y-4">
-
-                          {savedPostsMock.length === 0 ? (
-                            <EmptyState
-                              icon={Bookmark}
-                              title="No saved posts"
-                              description="Posts you save will appear here for quick access later."
-                            />
-                          ) : (
-                            savedPostsMock.map((post) => (
-                              <InstaPost
-                                key={post.id}
-                                id={String(post.id)}
-                                author={post.author}
-                                avatar={post.avatar}
-                                time={post.time}
-                                content={post.content}
-                                media_url={post.image}
-                                likes_count={post.likes}
-                                comments_count={post.comments}
-                              />
-                            ))
-                          )}
-                        </div>
-                      ) : (
-                        <SocialProfile />
-                      )}
+                    <motion.div key={profileMode} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+                      {profileMode === "work" ? <WorkProfile /> : <SocialProfile />}
                     </motion.div>
                   </AnimatePresence>
                 </div>
               </div>
+
             </>
           )}
         </div>
