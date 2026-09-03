@@ -178,6 +178,9 @@ const InstaPost = memo((props: InstaPostProps) => {
   const totalComments =
     comments_count + comments.reduce((acc, c) => acc + 1 + c.replies.length, 0) - SEED_COMMENTS.length;
 
+  const visibleComments = showAllComments ? comments : comments.slice(0, 2);
+
+
   const handleLike = useCallback(() => {
     setIsLiked((prev) => {
       if (!prev) playLike();
