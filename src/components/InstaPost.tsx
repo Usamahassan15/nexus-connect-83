@@ -161,6 +161,8 @@ const InstaPost = memo((props: InstaPostProps) => {
   const [shareOpen, setShareOpen] = useState(false);
   const [shareCount, setShareCount] = useState(shares_count ?? Math.max(1, Math.round(likes_count * 0.09)));
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
+
 
 
   const playLike = useUISound("like");
@@ -268,8 +270,16 @@ const InstaPost = memo((props: InstaPostProps) => {
         </button>
       )}
 
+      {/* Caption first for text-only posts */}
+      {!media_url && content && (
+        <p className="px-3 pb-1 text-sm text-foreground whitespace-pre-line">
+          <span className="font-semibold mr-1.5">{displayName}</span>
+          {content}
+        </p>
+      )}
+
       {/* Actions */}
-      <div className="flex items-center justify-between px-3 pt-2.5">
+      <div className={`flex items-center justify-between px-3 pt-2.5 ${!media_url ? "pb-3" : ""}`}>
         <button
           onClick={handleLike}
           aria-label="Like"
@@ -299,30 +309,22 @@ const InstaPost = memo((props: InstaPostProps) => {
         </button>
       </div>
 
-
-      {/* Likes + caption */}
-      <p className="px-3 pt-2 text-sm font-semibold text-foreground">{likes.toLocaleString()} likes</p>
-      {content && (
-        <p className="px-3 pt-1 text-sm text-foreground whitespace-pre-line">
+      {/* Caption below media posts */}
+      {media_url && content && (
+        <p className="px-3 pt-2 pb-3 text-sm text-foreground whitespace-pre-line">
           <span className="font-semibold mr-1.5">{displayName}</span>
           {content}
         </p>
       )}
-      <button
-        onClick={() => setShowComments(true)}
-        className="px-3 pt-1.5 pb-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        View all {Math.max(0, totalComments).toLocaleString()} comments
-      </button>
 
-      {/* Comments UI (separate) */}
-      <Dialog open={showComments} onOpenChange={(o) => { setShowComments(o); if (!o) setReplyTo(null); }}>
-        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
-          <DialogHeader className="px-4 py-3 border-b border-border">
+      {/* Comments UI (separate, fullscreen on mobile) */}
+      <Dialog open={showComments} onOpenChange={(o) => { setShowComments(o); if (!o) { setReplyTo(null); setShowAllComments(false); } }}>
+        <DialogContent className="flex flex-col p-0 gap-0 overflow-hidden w-screen h-[100dvh] max-w-none rounded-none sm:w-full sm:max-w-md sm:h-auto sm:max-h-[80vh] sm:rounded-lg">
+          <DialogHeader className="px-4 py-3 border-b border-border shrink-0">
             <DialogTitle className="text-base">Comments</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[55vh] overflow-y-auto px-3 py-2">
-            {comments.map((c) => (
+          <div className="flex-1 overflow-y-auto px-3 py-2 sm:max-h-[55vh]">
+            {visibleComments.map((c) => (
               <CommentNode
                 key={c.id}
                 comment={c}
@@ -332,7 +334,15 @@ const InstaPost = memo((props: InstaPostProps) => {
               />
             ))}
           </div>
-          <div className="px-3 py-2.5 border-t border-border">
+          {!showAllComments && comments.length > 2 && (
+            <button
+              onClick={() => setShowAllComments(true)}
+              className="px-4 py-2 text-left text-sm text-muted-foreground hover:text-foreground border-t border-border shrink-0"
+            >
+              View all {Math.max(0, totalComments).toLocaleString()} comments
+            </button>
+          )}
+          <div className="px-3 py-2.5 border-t border-border shrink-0">
             {replyTo && (
               <div className="flex items-center justify-between pb-1.5 text-xs text-muted-foreground">
                 <span>Replying to {replyTo.author}</span>
@@ -356,6 +366,7 @@ const InstaPost = memo((props: InstaPostProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
 
       <ShareSheet isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       {media_url && previewOpen && (
