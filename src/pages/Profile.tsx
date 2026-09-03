@@ -32,7 +32,7 @@ export default function Profile() {
   const [isCoverPreviewOpen, setIsCoverPreviewOpen] = useState(false);
   const [connectionsTab, setConnectionsTab] = useState<"followers" | "following" | null>(null);
   const [isShareProfileOpen, setIsShareProfileOpen] = useState(false);
-  const [contentTab, setContentTab] = useState<"posts" | "saved">("posts");
+  
   const [isLoading, setIsLoading] = useState(true);
   const isVerified = true;
 
