@@ -223,18 +223,26 @@ const InstaPost = memo((props: InstaPostProps) => {
     <article className="bg-card border-y sm:border sm:rounded-xl border-border overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5">
-        <Avatar className="w-9 h-9">
-          {displayAvatar && <AvatarImage src={displayAvatar} alt={displayName} />}
-          <AvatarFallback>{displayName[0]}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {category ? `#${category}` : ""}
-            {category && created_at ? " · " : ""}
-            {formatTime(created_at) || time || ""}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={openAuthorProfile}
+          disabled={is_anonymous}
+          aria-label={`Open ${displayName} profile`}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <Avatar className="w-9 h-9">
+            {displayAvatar && <AvatarImage src={displayAvatar} alt={displayName} />}
+            <AvatarFallback>{displayName[0]}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground truncate hover:underline">{displayName}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {category ? `#${category}` : ""}
+              {category && created_at ? " · " : ""}
+              {formatTime(created_at) || time || ""}
+            </p>
+          </div>
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Post options">
