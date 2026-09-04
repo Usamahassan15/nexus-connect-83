@@ -219,6 +219,11 @@ const InstaPost = memo((props: InstaPostProps) => {
     setReplyTo(null);
   }, [draft, replyTo, playComment]);
 
+  const openAuthorProfile = useCallback(() => {
+    if (is_anonymous) return;
+    navigate(profilePath(displayName, displayAvatar));
+  }, [is_anonymous, navigate, displayName, displayAvatar]);
+
   return (
     <article className="bg-card border-y sm:border sm:rounded-xl border-border overflow-hidden">
       {/* Header */}
