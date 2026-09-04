@@ -16,6 +16,8 @@ import { useUISound } from "@/hooks/use-ui-sound";
 import { toast } from "@/hooks/use-toast";
 import ShareSheet from "./ShareSheet";
 import ImagePreview from "./ImagePreview";
+import { useNavigate } from "react-router-dom";
+import { profilePath } from "@/lib/socialGraph";
 
 export interface InstaComment {
   id: string;
@@ -151,6 +153,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     time,
   } = props;
 
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(likes_count);
   const [isSaved, setIsSaved] = useState(false);
