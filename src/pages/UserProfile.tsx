@@ -1,9 +1,11 @@
-import { ArrowLeft, Calendar, MapPin, Link as LinkIcon, Users, Briefcase, MoreHorizontal, Flag, Ban } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Link as LinkIcon, Users, Briefcase, MoreHorizontal, Flag, Ban, Share2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ReportDialog from "@/components/ReportDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import ShareProfileModal from "@/components/ShareProfileModal";
+import { chatPath, isFollowing as graphIsFollowing, toggleFollow, slugify } from "@/lib/socialGraph";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import TopBar from "@/components/TopBar";
@@ -38,13 +40,39 @@ const samplePhotos = [
 export default function UserProfile() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const userId = Number(id);
-  const user = suggestedUsers.find(u => u.id === userId);
-  const profile = userProfiles[userId];
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [searchParams] = useSearchParams();
+  const queryName = searchParams.get("name");
+  const queryAvatar = searchParams.get("avatar");
+
+  const numericId = Number(id);
+  const bySlug = suggestedUsers.find(u => slugify(u.name) === (id ?? "")) ??
+    (queryName ? suggestedUsers.find(u => slugify(u.name) === slugify(queryName)) : undefined);
+  const known = Number.isFinite(numericId) && numericId > 0
+    ? suggestedUsers.find(u => u.id === numericId)
+    : bySlug;
+
+  const displayName = known?.name ?? queryName ?? "";
+  const user = known ?? (displayName
+    ? { id: 0, name: displayName, avatar: queryAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`, mutualFriends: 3 }
+    : undefined);
+
+  const fallbackProfile = {
+    bio: "Sharing moments and ideas ✨",
+    location: "Karachi, PK",
+    website: `${slugify(displayName || "user")}.social`,
+    joined: "March 2024",
+    followers: 1240,
+    following: 318,
+    posts: 42,
+    coverColor: "from-primary to-primary/60",
+  };
+  const profile = (known && userProfiles[known.id]) || (user ? fallbackProfile : undefined);
+
+  const [isFollowing, setIsFollowing] = useState(() => (displayName ? graphIsFollowing(displayName) : false));
   const [activeTab, setActiveTab] = useState("posts");
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   if (!user || !profile) {
     return (
@@ -58,8 +86,9 @@ export default function UserProfile() {
   }
 
   const handleFollow = () => {
-    setIsFollowing(prev => !prev);
-    toast({ title: isFollowing ? `Unfollowed ${user.name}` : `Following ${user.name}` });
+    const next = toggleFollow({ name: user.name, avatar: user.avatar });
+    setIsFollowing(next);
+    toast({ title: next ? `Following ${user.name}` : `Unfollowed ${user.name}` });
   };
 
   const samplePosts = [
@@ -110,7 +139,12 @@ export default function UserProfile() {
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 sm:flex-none h-9 sm:h-10 px-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 sm:flex-none h-9 sm:h-10 px-6"
+                  onClick={() => navigate(chatPath(user.name, user.avatar))}
+                >
                   Message
                 </Button>
                 <DropdownMenu>
@@ -120,6 +154,9 @@ export default function UserProfile() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => setIsShareOpen(true)}>
+                      <Share2 className="w-4 h-4 mr-2" /> Share profile
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsReportOpen(true)}>
                       <Flag className="w-4 h-4 mr-2" /> Report user
                     </DropdownMenuItem>
@@ -186,6 +223,13 @@ export default function UserProfile() {
           </div>
         </div>
       </main>
+
+      <ShareProfileModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        url={`${window.location.origin}/user/${slugify(user.name)}?name=${encodeURIComponent(user.name)}`}
+        title={`${user.name} on SocialApp`}
+      />
 
       <ReportDialog isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} type="user" />
 

@@ -16,6 +16,8 @@ import { useUISound } from "@/hooks/use-ui-sound";
 import { toast } from "@/hooks/use-toast";
 import ShareSheet from "./ShareSheet";
 import ImagePreview from "./ImagePreview";
+import { useNavigate } from "react-router-dom";
+import { profilePath } from "@/lib/socialGraph";
 
 export interface InstaComment {
   id: string;
@@ -151,6 +153,7 @@ const InstaPost = memo((props: InstaPostProps) => {
     time,
   } = props;
 
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(likes_count);
   const [isSaved, setIsSaved] = useState(false);
@@ -219,22 +222,35 @@ const InstaPost = memo((props: InstaPostProps) => {
     setReplyTo(null);
   }, [draft, replyTo, playComment]);
 
+  const openAuthorProfile = useCallback(() => {
+    if (is_anonymous) return;
+    navigate(profilePath(displayName, displayAvatar));
+  }, [is_anonymous, navigate, displayName, displayAvatar]);
+
   return (
     <article className="bg-card border-y sm:border sm:rounded-xl border-border overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5">
-        <Avatar className="w-9 h-9">
-          {displayAvatar && <AvatarImage src={displayAvatar} alt={displayName} />}
-          <AvatarFallback>{displayName[0]}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {category ? `#${category}` : ""}
-            {category && created_at ? " · " : ""}
-            {formatTime(created_at) || time || ""}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={openAuthorProfile}
+          disabled={is_anonymous}
+          aria-label={`Open ${displayName} profile`}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <Avatar className="w-9 h-9">
+            {displayAvatar && <AvatarImage src={displayAvatar} alt={displayName} />}
+            <AvatarFallback>{displayName[0]}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground truncate hover:underline">{displayName}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {category ? `#${category}` : ""}
+              {category && created_at ? " · " : ""}
+              {formatTime(created_at) || time || ""}
+            </p>
+          </div>
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Post options">
