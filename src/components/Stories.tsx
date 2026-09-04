@@ -7,14 +7,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
-const initialStories = [
-  { id: 1, name: "Your Story", image: null as string | null, isAdd: true },
+interface Story {
+  id: number;
+  name: string;
+  image: string | null;
+  media?: string | null;
+  isAdd?: boolean;
+}
+
+const initialStories: Story[] = [
+  { id: 1, name: "Your Story", image: null, isAdd: true },
   { id: 2, name: "Sarah", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", media: "https://picsum.photos/seed/story-sarah/720/1280" },
   { id: 3, name: "Mike", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike", media: "https://picsum.photos/seed/story-mike/720/1280" },
   { id: 4, name: "Emma", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", media: "https://picsum.photos/seed/story-emma/720/1280" },
   { id: 5, name: "Jake", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jake", media: "https://picsum.photos/seed/story-jake/720/1280" },
   { id: 6, name: "Olivia", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia", media: "https://picsum.photos/seed/story-olivia/720/1280" },
 ];
+
 
 const STORY_DURATION = 5000;
 
