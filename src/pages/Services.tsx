@@ -18,6 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import ServiceProjectsBidding from "@/components/ServiceProjectsBidding";
 import ServiceProviderProfile from "@/components/ServiceProviderProfile";
 import ServiceAuthDialog from "@/components/ServiceAuthDialog";
+import { chatPath } from "@/lib/socialGraph";
 import ServiceBookingFlow from "@/components/ServiceBookingFlow";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -215,7 +216,7 @@ export default function Services() {
       return;
     }
     setSelectedService(null);
-    navigate("/messages");
+    navigate(chatPath(providerName));
   };
 
   return (
@@ -311,28 +312,7 @@ export default function Services() {
             </div>
 
             {/* Google Map - Physical Services only */}
-            {serviceType === "physical" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl overflow-hidden border border-border/50 shadow-sm bg-muted"
-              >
-                <div className="flex items-center gap-2 px-3 py-2 bg-card border-b border-border/50">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <span className="text-xs sm:text-sm font-medium">
-                    {searchQuery ? `Showing "${searchQuery}" near you` : "Service providers near you"}
-                  </span>
-                </div>
-                <iframe
-                  title="Nearby service providers"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent((searchQuery ? searchQuery + " " : "") + "service providers near me")}&output=embed`}
-                  className="w-full h-48 sm:h-64 border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </motion.div>
-            )}
-          </motion.div>
+                      </motion.div>
 
           {services.length === 0 ? (
             <EmptyState
@@ -428,7 +408,7 @@ export default function Services() {
       <ServiceProjectsBidding isOpen={showProjectsBidding} onClose={() => { setShowProjectsBidding(false); if (searchParams.get("openProjects")) { searchParams.delete("openProjects"); setSearchParams(searchParams, { replace: true }); } }} initialTab={projectsBiddingTab} />
       <ServiceProviderProfile service={selectedService} isOpen={!!selectedService} onClose={() => setSelectedService(null)} onContact={handleContact} onBook={() => { if (selectedService) { setBookingService(selectedService); setSelectedService(null); } }} />
       <ServiceBookingFlow service={bookingService} open={!!bookingService} onOpenChange={(open) => { if (!open) setBookingService(null); }} onMessage={() => { setBookingService(null); navigate("/messages"); }} />
-      <ServiceAuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} onAuthComplete={() => { if (pendingProvider) { navigate("/messages"); setPendingProvider(null); } }} />
+      <ServiceAuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} onAuthComplete={() => { if (pendingProvider) { navigate(chatPath(pendingProvider)); setPendingProvider(null); } }} />
     </div>
   );
 }

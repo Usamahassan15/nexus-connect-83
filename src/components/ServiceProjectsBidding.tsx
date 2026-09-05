@@ -288,7 +288,7 @@ export default function ServiceProjectsBidding({ isOpen, onClose, initialTab = "
 
   // Project card component
   const ProjectCard = ({ project, showProposal = false }: { project: Project; showProposal?: boolean }) => (
-    <Card className="cursor-pointer hover:shadow-lg transition-all border-border/50">
+    <Card className="cursor-pointer hover:shadow-lg transition-all border-border/50" onClick={() => openProject(project)}>
       <CardContent className="p-3 sm:p-4">
         <div className="flex items-start gap-3">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
