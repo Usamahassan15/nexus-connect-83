@@ -311,8 +311,8 @@ export default function Services() {
               {categories.map((cat) => (<Button key={cat} variant={selectedCategory === cat ? "default" : "outline"} size="sm" className="flex-shrink-0 rounded-full text-xs sm:text-sm" onClick={() => setSelectedCategory(cat)}>{cat === "All Categories" ? "All" : cat}</Button>))}
             </div>
 
-            {/* Google Map - Physical Services only */}
-                      </motion.div>
+          </motion.div>
+
 
           {services.length === 0 ? (
             <EmptyState
