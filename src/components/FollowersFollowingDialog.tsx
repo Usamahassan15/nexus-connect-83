@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
+import { getFollowing, getFollowers, unfollowUser } from "@/lib/socialGraph";
 
 interface User {
   id: number;
@@ -43,8 +44,18 @@ interface Props {
 }
 
 export default function FollowersFollowingDialog({ isOpen, onClose, initialTab = "followers", followersCount = "1.2K", followingCount = "842" }: Props) {
-  const [followers, setFollowers] = useState(initialFollowers);
-  const [following, setFollowing] = useState(initialFollowing);
+  const graphToUsers = (list: { key: string; name: string; avatar?: string }[], offset: number): User[] =>
+    list.map((u, i) => ({
+      id: offset + i,
+      name: u.name,
+      username: `@${u.key}`,
+      bio: "",
+      avatar: u.avatar || u.name,
+      isFollowing: true,
+    }));
+
+  const [followers, setFollowers] = useState<User[]>(() => [...graphToUsers(getFollowers(), 10000), ...initialFollowers]);
+  const [following, setFollowing] = useState<User[]>(() => [...graphToUsers(getFollowing(), 20000), ...initialFollowing]);
   const [query, setQuery] = useState("");
 
   const toggleFollower = (id: number) => {
@@ -59,6 +70,7 @@ export default function FollowersFollowingDialog({ isOpen, onClose, initialTab =
 
   const unfollow = (id: number) => {
     const user = following.find(u => u.id === id);
+    if (user) unfollowUser(user.name);
     setFollowing(prev => prev.filter(u => u.id !== id));
     if (user) toast({ title: `Unfollowed ${user.name}` });
   };
