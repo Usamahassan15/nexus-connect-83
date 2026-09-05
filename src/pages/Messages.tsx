@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Send, MoreVertical, Phone, Video, Paperclip, FileText, Trash2, X, Reply, ChevronRight, Filter, Pin, CheckSquare, User, Archive, Ban, Star, Inbox, MailOpen, Flag, AlertTriangle, MessageCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import TopBar from "@/components/TopBar";
@@ -118,6 +118,7 @@ const initialMessages: Message[] = [
 
 const Messages = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversation, setSelectedConversation] = useState<number>(1);
   const [messageInput, setMessageInput] = useState("");
   const [showConversationList, setShowConversationList] = useState(true);
@@ -166,6 +167,35 @@ const Messages = () => {
   useEffect(() => {
     clearUnread();
   }, [clearUnread]);
+
+  // Open (or create) a chat when arriving with ?user=Name&avatar=...
+  useEffect(() => {
+    const name = searchParams.get("user");
+    if (!name) return;
+    const avatar = searchParams.get("avatar") || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+    let targetId = 0;
+    setConversations(prev => {
+      const existing = prev.find(c => c.user.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        targetId = existing.id;
+        return prev;
+      }
+      const created: Conversation = {
+        id: Date.now(),
+        user: name,
+        avatar,
+        lastMessage: "Say hi 👋",
+        time: "now",
+        online: true,
+      };
+      targetId = created.id;
+      setMessages([]);
+      return [created, ...prev];
+    });
+    setSelectedConversation(targetId);
+    setShowConversationList(false);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {

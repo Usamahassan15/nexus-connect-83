@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { profilePath } from "@/lib/socialGraph";
+import { Send, Eye } from "lucide-react";
 
 interface Story {
   id: number;
@@ -25,6 +27,14 @@ const initialStories: Story[] = [
 ];
 
 
+const storyViewers = [
+  { name: "Sarah", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", time: "2m ago" },
+  { name: "Mike", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike", time: "12m ago" },
+  { name: "Emma", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma", time: "35m ago" },
+  { name: "Jake", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jake", time: "1h ago" },
+  { name: "Olivia", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia", time: "2h ago" },
+];
+
 const STORY_DURATION = 5000;
 
 const Stories = () => {
@@ -35,6 +45,9 @@ const Stories = () => {
   const [previewIsVideo, setPreviewIsVideo] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [showViewers, setShowViewers] = useState(false);
 
   const handleYourStoryClick = () => {
     fileInputRef.current?.click();
@@ -76,6 +89,9 @@ const Stories = () => {
   const closeViewer = useCallback(() => {
     setViewerIndex(null);
     setProgress(0);
+    setPaused(false);
+    setShowViewers(false);
+    setReplyDraft("");
   }, []);
 
   const goNext = useCallback(() => {
@@ -94,15 +110,19 @@ const Stories = () => {
 
   // Auto-advance progress (Instagram style)
   useEffect(() => {
-    if (viewerIndex === null) return;
-    const start = Date.now();
+    if (viewerIndex === null || paused) return;
     const timer = setInterval(() => {
-      const pct = Math.min(100, ((Date.now() - start) / STORY_DURATION) * 100);
-      setProgress(pct);
-      if (pct >= 100) goNext();
+      setProgress((p) => {
+        const next = p + (50 / STORY_DURATION) * 100;
+        if (next >= 100) {
+          goNext();
+          return 0;
+        }
+        return next;
+      });
     }, 50);
     return () => clearInterval(timer);
-  }, [viewerIndex, goNext]);
+  }, [viewerIndex, paused, goNext]);
 
   useEffect(() => {
     if (viewerIndex === null) return;
@@ -248,7 +268,7 @@ const Stories = () => {
               {/* Header */}
               <div className="absolute top-5 left-3 right-3 z-20 flex items-center gap-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); closeViewer(); navigate(active.isAdd ? "/profile" : `/user/${active.id}`); }}
+                  onClick={(e) => { e.stopPropagation(); closeViewer(); navigate(active.isAdd ? "/profile" : profilePath(active.name, active.image || undefined)); }}
                   aria-label={`Open ${active.name} profile`}
                   className="flex items-center gap-2"
                 >
@@ -273,6 +293,85 @@ const Stories = () => {
                 alt={`${active.name} story`}
                 className="absolute inset-0 h-full w-full object-cover"
               />
+
+              {/* Bottom bar: reply input or your story views */}
+              <div className="absolute bottom-0 left-0 right-0 z-30 p-3 bg-gradient-to-t from-black/70 to-transparent">
+                {active.isAdd ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowViewers(true); setPaused(true); }}
+                    className="flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white"
+                  >
+                    <Eye className="h-4 w-4" />
+                    {storyViewers.length} views
+                  </button>
+                ) : (
+                  <form
+                    onClick={(e) => e.stopPropagation()}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!replyDraft.trim()) return;
+                      toast({ title: `Reply sent to ${active.name}`, description: replyDraft.trim() });
+                      setReplyDraft("");
+                      setPaused(false);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      value={replyDraft}
+                      onChange={(e) => setReplyDraft(e.target.value)}
+                      onFocus={() => setPaused(true)}
+                      onBlur={() => setPaused(false)}
+                      placeholder={`Reply to ${active.name}...`}
+                      className="flex-1 rounded-full border border-white/40 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/70 outline-none focus:border-white"
+                    />
+                    <button
+                      type="submit"
+                      aria-label="Send reply"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              {/* Story viewers list (your story only) */}
+              <AnimatePresence>
+                {showViewers && active.isAdd && (
+                  <motion.div
+                    initial={{ y: "100%" }}
+                    animate={{ y: 0 }}
+                    exit={{ y: "100%" }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute bottom-0 left-0 right-0 z-40 max-h-[65%] overflow-y-auto rounded-t-2xl bg-background p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-foreground">Viewed by {storyViewers.length}</p>
+                      <button onClick={() => { setShowViewers(false); setPaused(false); }} aria-label="Close viewers">
+                        <X className="h-5 w-5 text-muted-foreground" />
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {storyViewers.map((v) => (
+                        <button
+                          key={v.name}
+                          onClick={() => { closeViewer(); navigate(profilePath(v.name, v.avatar)); }}
+                          className="flex w-full items-center gap-3 text-left"
+                        >
+                          <Avatar className="h-9 w-9">
+                            <AvatarImage src={v.avatar} />
+                            <AvatarFallback>{v.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">{v.name}</p>
+                            <p className="text-xs text-muted-foreground">{v.time}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Tap zones */}
               <button

@@ -77,7 +77,6 @@ export default function ServicesDashboard() {
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onRoleSwitch={handleRoleSwitch}
-          onBack={() => navigate("/services")}
         />
       </div>
 
@@ -98,7 +97,6 @@ export default function ServicesDashboard() {
                 activeSection={activeSection}
                 onSectionChange={handleSectionChange}
                 onRoleSwitch={handleRoleSwitch}
-                onBack={() => navigate("/services")}
               />
             </SheetContent>
           </Sheet>
@@ -109,8 +107,8 @@ export default function ServicesDashboard() {
             </h1>
           </div>
 
-          <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate("/services")}>
-            ← Services
+          <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Close dashboard" onClick={() => navigate("/services")}>
+            <X className="w-5 h-5" />
           </Button>
         </div>
 

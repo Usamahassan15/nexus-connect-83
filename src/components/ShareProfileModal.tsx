@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Copy, Share2, Check, Facebook, Twitter, Linkedin, Mail } from "lucide-react";
+import { X, Copy, Share2, Check, Facebook, Twitter, Linkedin, Mail, MessageCircle, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,18 +9,21 @@ import { toast } from "@/hooks/use-toast";
 interface ShareProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  url?: string;
+  title?: string;
 }
 
-const ShareProfileModal = ({ isOpen, onClose }: ShareProfileModalProps) => {
+const ShareProfileModal = ({ isOpen, onClose, url, title }: ShareProfileModalProps) => {
   const [copied, setCopied] = useState(false);
-  const profileUrl = `${window.location.origin}/profile`;
+  const profileUrl = url || `${window.location.origin}/profile`;
+  const shareTitle = title || "Check out my profile";
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Check out my profile",
-          text: "Connect with me on SocialApp!",
+          title: shareTitle,
+          text: shareTitle,
           url: profileUrl,
         });
         onClose();
@@ -43,10 +46,12 @@ const ShareProfileModal = ({ isOpen, onClose }: ShareProfileModalProps) => {
   };
 
   const socialLinks = [
+    { name: "WhatsApp", icon: MessageCircle, url: `https://wa.me/?text=${encodeURIComponent(`${shareTitle} ${profileUrl}`)}` },
     { name: "Facebook", icon: Facebook, url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}` },
     { name: "Twitter", icon: Twitter, url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=Check out my profile!` },
     { name: "LinkedIn", icon: Linkedin, url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}` },
-    { name: "Email", icon: Mail, url: `mailto:?subject=Check out my profile&body=${encodeURIComponent(profileUrl)}` },
+    { name: "Instagram", icon: Instagram, url: `https://www.instagram.com/` },
+    { name: "Email", icon: Mail, url: `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(profileUrl)}` },
   ];
 
   // Try native share on mobile
@@ -101,7 +106,7 @@ const ShareProfileModal = ({ isOpen, onClose }: ShareProfileModalProps) => {
 
                 <div className="pt-2">
                   <p className="text-sm text-muted-foreground mb-3">Or share on:</p>
-                  <div className="flex gap-3 justify-center">
+                  <div className="flex flex-wrap gap-3 justify-center">
                     {socialLinks.map((social) => (
                       <Button
                         key={social.name}

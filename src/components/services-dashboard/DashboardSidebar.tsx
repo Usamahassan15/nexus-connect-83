@@ -12,7 +12,6 @@ interface DashboardSidebarProps {
   activeSection: DashboardSection;
   onSectionChange: (section: DashboardSection) => void;
   onRoleSwitch: () => void;
-  onBack: () => void;
 }
 
 const sellerMenu: { label: string; icon: React.ElementType; section: DashboardSection; badge?: string }[] = [
@@ -34,7 +33,7 @@ const buyerMenu: { label: string; icon: React.ElementType; section: DashboardSec
   { label: "Profile Settings", icon: UserCircle, section: "profile" },
 ];
 
-export default function DashboardSidebar({ role, activeSection, onSectionChange, onRoleSwitch, onBack }: DashboardSidebarProps) {
+export default function DashboardSidebar({ role, activeSection, onSectionChange, onRoleSwitch }: DashboardSidebarProps) {
   const menu = role === "seller" ? sellerMenu : buyerMenu;
 
   return (
@@ -85,12 +84,6 @@ export default function DashboardSidebar({ role, activeSection, onSectionChange,
         ))}
       </nav>
 
-      {/* Back to Services */}
-      <div className="p-3 border-t border-border/50">
-        <Button variant="outline" size="sm" className="w-full text-xs" onClick={onBack}>
-          ← Back to Services
-        </Button>
-      </div>
     </aside>
   );
 }
