@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, UserPlus, UserCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -58,6 +58,12 @@ export default function FollowersFollowingDialog({ isOpen, onClose, initialTab =
   const [following, setFollowing] = useState<User[]>(() => [...graphToUsers(getFollowing(), 20000), ...initialFollowing]);
   const [query, setQuery] = useState("");
 
+  useEffect(() => {
+    if (!isOpen) return;
+    setFollowers([...graphToUsers(getFollowers(), 10000), ...initialFollowers]);
+    setFollowing([...graphToUsers(getFollowing(), 20000), ...initialFollowing]);
+  }, [isOpen]);
+
   const toggleFollower = (id: number) => {
     setFollowers(prev => prev.map(u => {
       if (u.id === id) {
@@ -104,7 +110,7 @@ export default function FollowersFollowingDialog({ isOpen, onClose, initialTab =
                 {filter(followers).map(user => (
                   <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
                     <Avatar className="w-11 h-11">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} />
+                      <AvatarImage src={user.avatar.startsWith("http") ? user.avatar : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} />
                       <AvatarFallback>{user.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
@@ -127,7 +133,7 @@ export default function FollowersFollowingDialog({ isOpen, onClose, initialTab =
                 {filter(following).map(user => (
                   <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
                     <Avatar className="w-11 h-11">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} />
+                      <AvatarImage src={user.avatar.startsWith("http") ? user.avatar : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} />
                       <AvatarFallback>{user.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
