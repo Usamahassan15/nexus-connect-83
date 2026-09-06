@@ -105,7 +105,7 @@ export default function UserProfile() {
       <TopBar />
 
       <main className="flex-1 md:ml-64 pb-16 md:pb-8 pt-14 md:pt-14">
-        <div className="w-full max-w-[100vw] sm:max-w-xl lg:max-w-[780px] xl:max-w-[850px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8">
+        <div className="w-full max-w-[100vw] sm:max-w-xl lg:max-w-[560px] mx-auto px-0 sm:px-4 md:px-6 lg:px-0">
           {/* Cover Photo */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -211,11 +211,11 @@ export default function UserProfile() {
 
           {/* Tabs */}
           {profileMode === "work" ? (
-            <div className="px-0 sm:px-4 md:px-6">
-              <WorkProfile />
+            <div className="px-0 sm:px-4 md:px-6 lg:px-0">
+              <WorkProfile readOnly />
             </div>
           ) : (
-          <div className="px-0 sm:px-4 md:px-6">
+          <div className="px-0 sm:px-4 md:px-6 lg:px-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full grid grid-cols-2 mb-4">
                 <TabsTrigger value="posts" className="gap-2"><Image className="w-4 h-4" /> Posts</TabsTrigger>
