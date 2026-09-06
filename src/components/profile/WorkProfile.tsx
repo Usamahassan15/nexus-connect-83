@@ -121,7 +121,7 @@ export default function WorkProfile({ readOnly = false }: { readOnly?: boolean }
   return (
     <div className="space-y-5">
       {/* Edit / Save / Cancel buttons */}
-      <div className="flex justify-end gap-2">
+      <div className={`flex justify-end gap-2 ${readOnly ? "hidden" : ""}`}>
         {isEditing ? (
           <>
             <Button variant="outline" size="sm" onClick={cancelEditing} className="gap-1.5">
