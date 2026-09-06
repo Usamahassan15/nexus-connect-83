@@ -105,7 +105,7 @@ export default function SocialProfile() {
   return (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-4 bg-transparent p-0 gap-1 px-3 sm:px-0">
+        <TabsList className="w-full grid grid-cols-2 mb-4 bg-transparent p-0 gap-1 px-3 sm:px-0 lg:px-6">
           <TabsTrigger value="posts" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Image className="w-4 h-4" /> Posts
           </TabsTrigger>

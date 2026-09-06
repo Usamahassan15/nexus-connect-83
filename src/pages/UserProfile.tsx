@@ -16,6 +16,7 @@ import Post from "@/components/Post";
 import { suggestedUsers } from "@/components/PeopleYouMayKnow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image } from "lucide-react";
+import WorkProfile from "@/components/profile/WorkProfile";
 
 const userProfiles: Record<number, { bio: string; location: string; website: string; joined: string; followers: number; following: number; posts: number; coverColor: string }> = {
   1: { bio: "UX Designer & Cat lover 🐱 | Creating beautiful experiences", location: "New York, NY", website: "jessicalee.design", joined: "January 2023", followers: 2400, following: 680, posts: 95, coverColor: "from-rose-500 to-pink-600" },
@@ -70,6 +71,7 @@ export default function UserProfile() {
 
   const [isFollowing, setIsFollowing] = useState(() => (displayName ? graphIsFollowing(displayName) : false));
   const [activeTab, setActiveTab] = useState("posts");
+  const [profileMode, setProfileMode] = useState<"social" | "work">("social");
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -193,13 +195,33 @@ export default function UserProfile() {
             </div>
           </motion.div>
 
+          {/* Social / Work Toggle */}
+          <div className="px-3 sm:px-4 md:px-6 mb-4">
+            <div className="flex rounded-xl bg-transparent border border-border p-1 gap-1">
+              <button onClick={() => setProfileMode("social")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${profileMode === "social" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <Users className="w-4 h-4" /> Social
+              </button>
+              <button onClick={() => setProfileMode("work")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${profileMode === "work" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <Briefcase className="w-4 h-4" /> Work
+              </button>
+            </div>
+          </div>
+
           {/* Tabs */}
+          {profileMode === "work" ? (
+            <div className="px-0 sm:px-4 md:px-6">
+              <WorkProfile />
+            </div>
+          ) : (
           <div className="px-0 sm:px-4 md:px-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full grid grid-cols-2 mb-4">
                 <TabsTrigger value="posts" className="gap-2"><Image className="w-4 h-4" /> Posts</TabsTrigger>
                 <TabsTrigger value="photos" className="gap-2"><Image className="w-4 h-4" /> Photos</TabsTrigger>
               </TabsList>
+
 
               <TabsContent value="posts" className="space-y-3 sm:space-y-4">
                 {samplePosts.map((post, index) => (
@@ -221,6 +243,8 @@ export default function UserProfile() {
               </TabsContent>
             </Tabs>
           </div>
+          )}
+
         </div>
       </main>
 
