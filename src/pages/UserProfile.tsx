@@ -12,7 +12,7 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-import Post from "@/components/Post";
+import InstaPost from "@/components/InstaPost";
 import { suggestedUsers } from "@/components/PeopleYouMayKnow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image } from "lucide-react";
