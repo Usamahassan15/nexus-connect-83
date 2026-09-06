@@ -55,7 +55,7 @@ const defaultData = {
 
 const serviceIcons = [Briefcase, Star, Users];
 
-export default function WorkProfile() {
+export default function WorkProfile({ readOnly = false }: { readOnly?: boolean }) {
   const [isEditing, setIsEditing] = useState(false);
   const [data, setData] = useState(defaultData);
   const [draft, setDraft] = useState(defaultData);
