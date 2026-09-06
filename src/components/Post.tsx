@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send, UserPlus, Flag, Ban, Camera, Smile } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Send, UserPlus, Flag, Ban, Camera, Smile } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 import EngagementUsersDialog from "./EngagementUsersDialog";
@@ -40,6 +40,7 @@ const Post = ({ author, avatar, time, content, image, likes, comments }: PostPro
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
   const [likeCount, setLikeCount] = useState(likes);
+  const [shareCount, setShareCount] = useState(3);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -165,31 +166,14 @@ const Post = ({ author, avatar, time, content, image, likes, comments }: PostPro
           </motion.div>
         )}
 
-        {/* Stats */}
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground px-2 sm:px-3 py-1.5 border-b border-border">
-          <button onClick={() => setEngagementDialog({ type: "likes", count: likeCount })} className="hover:underline hover:text-foreground transition-colors">
-            {likeCount} likes
-          </button>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setEngagementDialog({ type: "comments", count: comments })} className="hover:underline hover:text-foreground transition-colors">
-              {comments} comments
-            </button>
-            <button onClick={() => setEngagementDialog({ type: "shares", count: 3 })} className="hover:underline hover:text-foreground transition-colors">
-              3 shares
-            </button>
-            <button onClick={() => setEngagementDialog({ type: "saves", count: 4 })} className="hover:underline hover:text-foreground transition-colors">
-              4 saves
-            </button>
-          </div>
-        </div>
-
         {/* Actions */}
-        <div className="grid grid-cols-4 gap-0.5 px-1 sm:px-2 py-1">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 border-t border-border/60">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleLike}
-            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 px-1 py-1.5 rounded-md hover:bg-muted transition-colors"
+            className="flex min-w-[3.25rem] items-center justify-start gap-2 rounded-md py-1 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Like"
           >
             <AnimatePresence mode="wait">
               {isLiked ? (
@@ -200,45 +184,47 @@ const Post = ({ author, avatar, time, content, image, likes, comments }: PostPro
                   exit={{ scale: 0 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-red-500 text-red-500" />
+                   <Heart className="w-6 h-6 fill-red-500 text-red-500" />
                 </motion.div>
               ) : (
                 <motion.div key="not-liked" initial={{ scale: 1 }} animate={{ scale: 1 }}>
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
+                   <Heart className="w-6 h-6" />
                 </motion.div>
               )}
             </AnimatePresence>
-            <span className="text-[10px] sm:text-xs font-medium text-foreground cursor-pointer" onClick={(e) => { e.stopPropagation(); setEngagementDialog({ type: "likes", count: likeCount }); }}>Like</span>
+            <span className="text-sm font-medium text-foreground" onClick={(e) => { e.stopPropagation(); setEngagementDialog({ type: "likes", count: likeCount }); }}>{likeCount}</span>
           </motion.button>
           
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowComments(!showComments)}
-            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 px-1 py-1.5 rounded-md hover:bg-muted transition-colors"
+            className="flex min-w-[3.25rem] items-center justify-start gap-2 rounded-md py-1 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Comments"
           >
-            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-            <span className="text-[10px] sm:text-xs font-medium text-foreground">Comment</span>
+            <MessageCircle className="w-6 h-6" />
+            <span className="text-sm font-medium text-foreground">{comments}</span>
           </motion.button>
           
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => { playShare(); setShowShareSheet(true); }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 px-1 py-1.5 rounded-md hover:bg-muted transition-colors"
+            onClick={() => { playShare(); setShareCount((count) => count + 1); setShowShareSheet(true); }}
+            className="flex min-w-[3.25rem] items-center justify-start gap-2 rounded-md py-1 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Share"
           >
-            <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-            <span className="text-[10px] sm:text-xs font-medium text-foreground cursor-pointer" onClick={(e) => { e.stopPropagation(); setEngagementDialog({ type: "shares", count: 3 }); }}>Share</span>
+            <Send className="w-6 h-6" />
+            <span className="text-sm font-medium text-foreground" onClick={(e) => { e.stopPropagation(); setEngagementDialog({ type: "shares", count: shareCount }); }}>{shareCount}</span>
           </motion.button>
           
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => { playSave(); setIsSaved(!isSaved); }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 px-1 py-1.5 rounded-md hover:bg-muted transition-colors"
+            className="flex items-center justify-center rounded-md py-1 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Save"
           >
-            <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? 'fill-primary text-primary' : 'text-foreground'}`} />
-            <span className="text-[10px] sm:text-xs font-medium text-foreground cursor-pointer" onClick={(e) => { e.stopPropagation(); setEngagementDialog({ type: "saves", count: 4 }); }}>Save</span>
+            <Bookmark className={`w-6 h-6 ${isSaved ? 'fill-primary text-primary' : ''}`} />
           </motion.button>
         </div>
 
