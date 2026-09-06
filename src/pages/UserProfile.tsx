@@ -226,7 +226,16 @@ export default function UserProfile() {
               <TabsContent value="posts" className="space-y-3 sm:space-y-4">
                 {samplePosts.map((post, index) => (
                   <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-                    <Post {...post} />
+                    <InstaPost
+                      id={String(post.id)}
+                      author={post.author}
+                      avatar={post.avatar}
+                      time={post.time}
+                      content={post.content}
+                      media_url={post.image}
+                      likes_count={post.likes}
+                      comments_count={post.comments}
+                    />
                   </motion.div>
                 ))}
               </TabsContent>
