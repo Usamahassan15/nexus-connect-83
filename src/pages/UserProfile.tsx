@@ -241,6 +241,8 @@ export default function UserProfile() {
               </TabsContent>
             </Tabs>
           </div>
+          )}
+
         </div>
       </main>
 
