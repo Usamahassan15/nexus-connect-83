@@ -16,6 +16,7 @@ import Post from "@/components/Post";
 import { suggestedUsers } from "@/components/PeopleYouMayKnow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image } from "lucide-react";
+import WorkProfile from "@/components/profile/WorkProfile";
 
 const userProfiles: Record<number, { bio: string; location: string; website: string; joined: string; followers: number; following: number; posts: number; coverColor: string }> = {
   1: { bio: "UX Designer & Cat lover 🐱 | Creating beautiful experiences", location: "New York, NY", website: "jessicalee.design", joined: "January 2023", followers: 2400, following: 680, posts: 95, coverColor: "from-rose-500 to-pink-600" },
@@ -70,6 +71,7 @@ export default function UserProfile() {
 
   const [isFollowing, setIsFollowing] = useState(() => (displayName ? graphIsFollowing(displayName) : false));
   const [activeTab, setActiveTab] = useState("posts");
+  const [profileMode, setProfileMode] = useState<"social" | "work">("social");
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
